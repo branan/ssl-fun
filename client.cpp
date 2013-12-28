@@ -39,4 +39,6 @@ int main() {
   // From here on out we're dealing with C objects. Aren't you excited?
   if(!validate_hostname("localhost", server_cert))
     cout << "Hostname mismatch!";
+
+  cout << "Using: " << SSL_get_cipher_name(sock.native_handle()) << endl;
 }
