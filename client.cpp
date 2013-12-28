@@ -22,9 +22,26 @@ int main() {
   // talk to localhost on port 9090
   net::io_service io_service;
   net::ip::tcp::resolver resolver(io_service);
-  net::ip::tcp::resolver::query query("127.0.0.1", "9090");
+  net::ip::tcp::resolver::query query("localhost", "9090");
   net::ip::tcp::resolver::iterator iterator = resolver.resolve(query);
-  net::ip::tcp::endpoint endpoint = *iterator;
+  net::ip::tcp::endpoint endpoint;
+  bool found_endpoint = false;
+
+  // We could end up with an ipv6 endpoint from the resolver, but our
+  // example server code doesn't support ipv6. We just have to flip
+  // through the results until we find ipv4.
+  while(iterator != net::ip::tcp::resolver::iterator()) {
+    endpoint = *iterator++;
+    if(endpoint.protocol() == net::ip::tcp::v4()) {
+      found_endpoint = true;
+      break;
+    }
+  }
+
+  if(!found_endpoint) {
+    cout << "Could not resolve ipv4 DNS for localhost... WTF?" << endl;
+    return 1;
+  }
 
   // Now we set up the SSL context, including loading the CA cert.
   // Because we want to use the fancy ECDHE-RSA-foo stuff, we need to
