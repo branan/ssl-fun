@@ -44,17 +44,11 @@ int main() {
   }
 
   // Now we set up the SSL context, including loading the CA cert.
-  // Because we want to use the fancy ECDHE-RSA-foo stuff, we need to
-  // load up an eliptic curve from OpenSSL. boost::asio doesn't handle
-  // this, so we're down into some OpenSSL functions for a little
-  // while.
-  // We also set our preferred chipher while we're here
+  // We don't need to setup any EC params - that's all handled
+  // server-side.  We also set our preferred chipher while we're here
   net::ssl::context ctx(net::ssl::context::tlsv12_client);
   ctx.load_verify_file("../ca/rootCA.pem");
   ctx.set_options(net::ssl::context::default_workarounds);
-  EC_KEY *ecdh = EC_KEY_new_by_curve_name (NID_X9_62_prime256v1);
-  SSL_CTX_set_tmp_ecdh (ctx.native_handle(), ecdh);
-  EC_KEY_free (ecdh);
   SSL_CTX_set_cipher_list(ctx.native_handle(), "ECDHE-RSA-AES256-GCM-SHA384");
 
   // Create our socket, connect to the server, and do our SSL
